@@ -43,10 +43,12 @@ class observers {
         foreach ($courseids as $courseid) {
             $course = get_course($courseid);
 
-            // If parent course doesn't use groups, we can skip synchronization.
-            if (groups_get_course_groupmode($course) == NOGROUPS) {
-                continue;
-            }
+            // START UCLA MOD: CCLE-3718 - Group Management for TA sites
+            //// If parent course doesn't use groups, we can skip synchronization.
+            //if (groups_get_course_groupmode($course) == NOGROUPS) {
+            //    continue;
+            //}
+            // END UCLA MOD: CCLE-3718
 
             if (! $DB->record_exists('groups', array('courseid' => $course->id, 'idnumber' => $group->id))) {
                 $metagroup = new \stdClass();
