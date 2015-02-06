@@ -40,10 +40,12 @@ class observers {
         if (strcasecmp($instance->enrol, 'meta') == 0) {
             $course = get_course($instance->courseid);
 
-            // Return early if course doesn't use groups.
-            if (groups_get_course_groupmode($course) == NOGROUPS) {
-                return;
-            }
+            // START UCLA MOD: CCLE-3718 - Group Management for TA sites
+            //// Return early if course doesn't use groups.
+            //if (groups_get_course_groupmode($course) == NOGROUPS) {
+            //    return;
+            //}
+            // END UCLA MOD: CCLE-3718
 
             // Immediate synchronization could be expensive, defer to adhoc task.
             $task = new \local_metagroups\task\synchronize();
@@ -92,10 +94,12 @@ class observers {
         foreach ($courseids as $courseid) {
             $course = get_course($courseid);
 
-            // If parent course doesn't use groups, we can skip synchronization.
-            if (groups_get_course_groupmode($course) == NOGROUPS) {
-                continue;
-            }
+            // START UCLA MOD: CCLE-3718 - Group Management for TA sites
+            //// If parent course doesn't use groups, we can skip synchronization.
+            //if (groups_get_course_groupmode($course) == NOGROUPS) {
+            //    continue;
+            //}
+            // END UCLA MOD: CCLE-3718
 
             if (! $DB->record_exists('groups', array('courseid' => $course->id, 'idnumber' => $group->id))) {
                 $metagroup = new \stdClass();

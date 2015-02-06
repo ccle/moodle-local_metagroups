@@ -24,6 +24,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/grouplib.php');
 require_once($CFG->dirroot . '/group/lib.php');
+// START UCLA MOD: CCLE-3718 - Group Management for TA sites
+require_once($CFG->dirroot . '/local/publicprivate/lib/course.class.php');
+// END UCLA MOD: CCLE-3718
 
 /**
  * Get a list of parent courses for a given course ID
@@ -75,10 +78,13 @@ function local_metagroups_sync(progress_trace $trace, $courseid = null) {
     foreach (array_unique($courseids) as $courseid) {
         $parent = get_course($courseid);
 
-        // If parent course doesn't use groups, we can skip synchronization.
-        if (groups_get_course_groupmode($parent) == NOGROUPS) {
-            continue;
-        }
+        // START UCLA MOD: CCLE-3718 - Group Management for TA sites
+        // Removing check for group setting of parent courses.
+        //// If parent course doesn't use groups, we can skip synchronization.
+        //if (groups_get_course_groupmode($parent) == NOGROUPS) {
+        //    continue;
+        //}
+        // END UCLA MOD: CCLE-3718
 
         $trace->output($parent->fullname, 1);
 
@@ -88,12 +94,29 @@ function local_metagroups_sync(progress_trace $trace, $courseid = null) {
             $trace->output($child->fullname, 2);
 
             $groups = groups_get_all_groups($child->id);
+            // START UCLA MOD: CCLE-3718 - Group Management for TA sites
+            // Adding a check to prevent duplication of 'Course members' group.
+            $ppcourse = PublicPrivate_Course::build($childid);
+            // END UCLA MOD: CCLE-3718
             foreach ($groups as $group) {
+                // START UCLA MOD: CCLE-3718 - Group Management for TA sites
+                if ($group->id == $ppcourse->get_group()) {
+                    continue;
+                }
+                // END UCLA MOD: CCLE-3718
                 if (! $metagroup = $DB->get_record('groups', array('courseid' => $parent->id, 'idnumber' => $group->id))) {
                     $metagroup = new stdClass();
                     $metagroup->courseid = $parent->id;
                     $metagroup->idnumber = $group->id;
                     $metagroup->name = $group->name;
+                    // START UCLA MOD: CCLE-3718 - Group Management for TA sites
+                    // Adding necessary fields to metagroup object when passing to add_record_snapshot().
+                    $metagroup->description = $group->description;
+                    $metagroup->descriptionformat = $group->descriptionformat;
+                    $metagroup->enrolmentkey = $group->enrolmentkey;
+                    $metagroup->picture = $group->picture;
+                    $metagroup->hidepicture = $group->hidepicture;
+                    // END UCLA MOD: CCLE-3718
 
                     $metagroup->id = groups_create_group($metagroup, false, false);
                 }
