@@ -15,13 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Scheduled tasks definition
+ *
  * @package    local_metagroups
- * @copyright  2014 Paul Holden (pholden@greenhead.ac.uk)
+ * @copyright  2016 Vadim Dvorovenko (vadimon@mail.ru)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Meta-course group synchronization';
-$string['privacy:metadata:core_group'] = 'The Meta-course group synchronization plugin can create groups or use existing groups to add participants of linked courses';
-$string['synctask'] = 'Meta-course group synchronization';
+$tasks = array(
+    array(
+        'classname' => 'local_metagroups\task\sync_task',
+        'blocking' => 0,
+        'minute' => '32',
+        'hour' => '7,17',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*'
+    )
+);
