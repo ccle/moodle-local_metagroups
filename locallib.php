@@ -26,6 +26,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/grouplib.php');
 require_once($CFG->dirroot . '/group/lib.php');
+// START UCLA MOD: CCLE-3718 - Group Management for TA sites
+ require_once($CFG->dirroot . '/local/publicprivate/lib/course.class.php');
+ // END UCLA MOD: CCLE-3718
 
 /**
  * Get a list of parent courses for a given course ID
@@ -125,9 +128,18 @@ function local_metagroups_sync(progress_trace $trace, $courseid = null) {
         foreach ($children as $childid) {
             $child = get_course($childid);
             $trace->output($child->fullname, 2);
+            // START UCLA MOD: CCLE-3718 - Group Management for TA sites
+            $ppcourse = PublicPrivate_Course::build($childid);
+            // END UCLA MOD: CCLE-3718
 
             $groups = groups_get_all_groups($child->id);
             foreach ($groups as $group) {
+                // START UCLA MOD: CCLE-3718 - Group Management for TA sites
+                // Adding a check to prevent duplication of 'Course members' group.
+                if ($group->id == $ppcourse->get_group()) {
+                    continue;
+                }
+                // END UCLA MOD: CCLE-3718
                 if (! $metagroup = $DB->get_record('groups', array('courseid' => $parent->id, 'idnumber' => $group->id))) {
                     $metagroup = new stdClass();
                     $metagroup->courseid = $parent->id;
@@ -157,6 +169,12 @@ function local_metagroups_sync(progress_trace $trace, $courseid = null) {
 
             $childgroupings = groups_get_all_groupings($child->id); // Get groupings from child course.
             foreach ($childgroupings as $grouping) { // Browse child course groupings and create in parent course if necessary.
+                // START UCLA MOD: CCLE-3718 - Group Management for TA sites
+                // Adding a check to prevent duplication of 'Private Course Material' grouping.
+                if ($grouping->id == $ppcourse->get_grouping()) {
+                    continue;
+                }
+                // END UCLA MOD: CCLE-3718
                 if (!$metagrouping = $DB->get_record('groupings', array('courseid' => $parent->id, 'idnumber' => $grouping->id))) {
                     $metagrouping = new stdClass();
                     $metagrouping->courseid = $parent->id;
