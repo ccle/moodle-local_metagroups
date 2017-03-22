@@ -28,11 +28,10 @@ $tasks = array(
     array(
         'classname' => 'local_metagroups\task\sync_task',
         'blocking' => 0,
-        'minute' => '0',
-        'hour' => '0',
+        'minute' => '32',
+        'hour' => '7,17',
         'day' => '*',
-        'month' => '*',
         'dayofweek' => '*',
-        'disabled' => 1
+        'month' => '*'
     )
 );
