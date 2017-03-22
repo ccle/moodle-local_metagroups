@@ -48,7 +48,7 @@ class sync_task extends \core\task\scheduled_task {
      * Throw exceptions on errors (the job will be retried).
      */
     public function execute() {
-        $trace = new text_progress_trace();
+        $trace = new \text_progress_trace();
         local_metagroups_sync($trace, null);
         $trace->finished();
     }
